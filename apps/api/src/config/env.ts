@@ -5,6 +5,10 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   // Unpooled connection used by Prisma migrate/introspect (Neon direct endpoint).
   DIRECT_URL: z.string().optional(),
+  // Optional URL prefix the API is served under (e.g. "/api" when deployed as a
+  // Vercel Service behind a shared domain). Empty by default so local dev, the
+  // test suite and the mobile clients keep talking to the bare routes.
+  API_BASE_PATH: z.string().default(''),
   API_PORT: z.coerce.number().int().default(4000),
   API_HOST: z.string().default('0.0.0.0'),
   CORS_ORIGINS: z.string().default('http://localhost:3000'),

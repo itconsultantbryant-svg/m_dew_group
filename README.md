@@ -153,17 +153,20 @@ The live overview is served by a single endpoint, `GET /staff/admin/overview`, f
 
 ## Deploying (Neon + Vercel)
 
-The project ships ready for **Neon** (PostgreSQL) and **Vercel** (web + API as serverless
-functions):
+The project ships ready for **Neon** (PostgreSQL) and **Vercel**:
 
-- `apps/api/vercel.json` + `apps/api/api/index.ts` deploy the Fastify app as one serverless
-  function (all paths rewritten to it).
-- `apps/web/vercel.json` deploys the Next.js app; set `NEXT_PUBLIC_API_URL` to the API URL.
-- Prisma is configured with a pooled `DATABASE_URL` (runtime) and an unpooled `DIRECT_URL`
-  (migrations) for Neon.
+- **Two projects** (web + API as separate Vercel projects), or
+- **One project with [Vercel Services](https://vercel.com/docs/services)** — the committed root
+  `vercel.json` serves the web app at `/` and the API at `/api` on a shared domain, with the web's
+  server-side calls reaching the API over a private `API_URL` binding.
 
-See **[docs/DEPLOYMENT.md §12](docs/DEPLOYMENT.md#12-neon--vercel-reference-deployment)** for the
-full step-by-step (project creation, environment variables, migrations and CORS).
+The API serves everything under `API_BASE_PATH` (empty by default; `/api` in services mode), managed
+by `apps/api/vercel.json` / root `vercel.json`, and Prisma uses a pooled `DATABASE_URL` (runtime) plus
+an unpooled `DIRECT_URL` (migrations) for Neon.
+
+See **[docs/DEPLOY-NEON-VERCEL.md](docs/DEPLOY-NEON-VERCEL.md)** for the full step-by-step guide
+and **[docs/DEPLOYMENT.md §12](docs/DEPLOYMENT.md#12-neon--vercel-reference-deployment)** for the
+condensed reference (project creation, environment variables, migrations and CORS).
 
 ---
 
@@ -186,8 +189,10 @@ docs/
 
 ## Documentation
 
-- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — production deployment, secrets, migrations, backups,
-  observability and a go-live checklist.
+- [`docs/DEPLOY-NEON-VERCEL.md`](docs/DEPLOY-NEON-VERCEL.md) — step-by-step production deploy on
+  **Neon + Vercel** (database, secrets, migrations, first admin, domains, troubleshooting).
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — broader production guide: secrets, migrations,
+  backups, observability, container/host options and a go-live checklist.
 
 ## License
 

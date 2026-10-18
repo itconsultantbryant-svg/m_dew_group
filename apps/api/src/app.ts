@@ -14,6 +14,10 @@ import { registerStaffRoutes } from './routes/staff.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
   const env = loadEnv();
+  // When the API is mounted under a path prefix (Vercel Services routes "/api/*"
+  // to this service and forwards the path unchanged), every route — including
+  // health, the OpenAPI document and the docs UI — is registered beneath it.
+  const basePath = (env.API_BASE_PATH ?? '').replace(/\/+$/, '');
   const app = Fastify({
     logger: { level: env.NODE_ENV === 'production' ? 'info' : 'warn' },
     trustProxy: true,
@@ -68,12 +72,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   // ENABLE_API_DOCS=true is set explicitly.
   const enableDocsUi = env.NODE_ENV !== 'production' || process.env.ENABLE_API_DOCS === 'true';
   if (enableDocsUi) {
-    await app.register(swaggerUi, { routePrefix: '/docs', uiConfig: { docExpansion: 'list' } });
+    await app.register(swaggerUi, { routePrefix: `${basePath}/docs`, uiConfig: { docExpansion: 'list' } });
   }
-
-  app.get('/health', async () => ({ status: 'ok', service: 'mdg-api', time: new Date().toISOString() }));
-
-  app.get('/openapi.json', async () => app.swagger());
 
   app.setErrorHandler((error, request, reply) => {
     const requestId = request.id;
@@ -98,9 +98,19 @@ export async function buildApp(): Promise<FastifyInstance> {
     reply.status(404).send({ error: { code: 'NOT_FOUND', message: 'Route not found.', requestId: request.id } });
   });
 
-  await app.register(async (instance) => registerPublicRoutes(instance), { prefix: '' });
-  await app.register(async (instance) => registerAuthRoutes(instance), { prefix: '' });
-  await app.register(async (instance) => registerStaffRoutes(instance), { prefix: '' });
+  // Everything the API exposes — health, the OpenAPI document and all routes —
+  // lives under `basePath` so a single shared public domain can host the web app
+  // at "/" and the API at "/api" (Vercel Services).
+  await app.register(
+    async (scope) => {
+      scope.get('/health', async () => ({ status: 'ok', service: 'mdg-api', time: new Date().toISOString() }));
+      scope.get('/openapi.json', async () => scope.swagger());
+      await scope.register(async (instance) => registerPublicRoutes(instance));
+      await scope.register(async (instance) => registerAuthRoutes(instance));
+      await scope.register(async (instance) => registerStaffRoutes(instance));
+    },
+    { prefix: basePath },
+  );
 
   app.addHook('onClose', async () => {
     await prisma.$disconnect();

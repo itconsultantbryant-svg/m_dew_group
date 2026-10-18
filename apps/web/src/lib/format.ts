@@ -1,5 +1,21 @@
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4100';
 
+/**
+ * Base URL for calls made **server-side** (React Server Components, route
+ * handlers). When the web app and API run as Vercel Services on a shared domain,
+ * the `web` service declares a binding to `api` that injects the private,
+ * deployment-aware URL into `API_URL`. Inside a function that binding lets us
+ * call the API without going over the public internet. Falls back to the public
+ * base URL everywhere else (local dev, standalone deployments).
+ */
+export function serverApiBaseUrl(): string {
+  const binding = process.env.API_URL;
+  if (binding) {
+    return `${binding.replace(/\/+$/, '')}${process.env.API_BASE_PATH ?? ''}`;
+  }
+  return API_BASE_URL;
+}
+
 export { formatMoney } from '@mdg/domain';
 
 export function formatDate(value: string, opts: { withYear?: boolean } = {}): string {

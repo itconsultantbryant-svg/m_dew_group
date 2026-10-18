@@ -228,6 +228,11 @@ provider webhooks against the ledger and keep idempotency keys on charge creatio
 This is the supported deployment shape for this repository: **Neon** for PostgreSQL, and **Vercel**
 for both the web app and the API (the Fastify app is exported as a single serverless function).
 
+> For a dedicated, copy-paste walkthrough (Neon CLI, secret generation, first-admin bootstrap,
+> custom domains and troubleshooting), see
+> **[`docs/DEPLOY-NEON-VERCEL.md`](DEPLOY-NEON-VERCEL.md)**. The section below is the condensed
+> reference.
+
 ### 12.1 Prerequisites
 
 - A Neon account (`npx neonctl auth` or the console) and a Vercel account.

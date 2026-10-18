@@ -3,11 +3,11 @@ import type {
   PublicPropertyDto,
   RoomTypeDto,
 } from '@mdg/domain';
-import { API_BASE_URL } from './format';
+import { serverApiBaseUrl } from './format';
 
 async function getJson<T>(path: string): Promise<T | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}${path}`, { cache: 'no-store' });
+    const res = await fetch(`${serverApiBaseUrl()}${path}`, { cache: 'no-store' });
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
