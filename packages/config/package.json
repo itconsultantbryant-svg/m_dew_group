@@ -1,0 +1,15 @@
+{
+  "name": "@mdg/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./eslint": "./eslint.config.js"
+  },
+  "scripts": {
+    "build": "echo \"no build for config\"",
+    "typecheck": "echo \"no typecheck for config\"",
+    "lint": "echo \"no lint for config\""
+  }
+}

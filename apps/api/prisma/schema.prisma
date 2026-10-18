@@ -1,0 +1,1202 @@
+// Mountain Dew Group - PostgreSQL schema
+// Money is stored as integer minor units (cents) with an explicit currency.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // DATABASE_URL should use the Neon pooled (PgBouncer) endpoint for the app at
+  // runtime. DIRECT_URL is the unpooled endpoint used by migrations/introspection.
+  // On a local PostgreSQL the two are usually identical.
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Currency {
+  USD
+  LRD
+}
+
+enum SmokingPolicy {
+  NON_SMOKING
+  SMOKING
+  DESIGNATED
+}
+
+enum ReservationState {
+  HELD
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+  NO_SHOW
+  EXPIRED
+}
+
+enum PaymentState {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+  PARTIALLY_REFUNDED
+  REFUNDED
+}
+
+enum ReservationSource {
+  ONLINE
+  WALK_IN
+  PHONE
+  STAFF
+}
+
+enum RoomReadiness {
+  CLEAN
+  DIRTY
+  IN_PROGRESS
+  INSPECTED
+  OUT_OF_ORDER
+}
+
+enum BlockKind {
+  MAINTENANCE
+  OUT_OF_ORDER
+  BLOCK
+}
+
+enum TaskType {
+  CLEAN
+  INSPECT
+  MAINTENANCE
+  TURNDOWN
+}
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+  INSPECTED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  MTN_MOBILE_MONEY
+  ORANGE_MONEY
+  BANK_TRANSFER
+  CARD_TERMINAL
+}
+
+enum TaxKind {
+  TAX
+  FEE
+  SERVICE_CHARGE
+}
+
+enum ChargeMode {
+  PERCENT
+  FLAT
+}
+
+enum PromotionKind {
+  PERCENT
+  AMOUNT
+}
+
+enum MediaKind {
+  IMAGE
+  VIDEO
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum GuestRequestStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  COMPLETED
+}
+
+enum InquiryStatus {
+  NEW
+  IN_PROGRESS
+  CONFIRMED
+  DECLINED
+  CLOSED
+}
+
+enum ReviewStatus {
+  PENDING
+  PUBLISHED
+  REJECTED
+}
+
+enum Role {
+  OWNER
+  GENERAL_MANAGER
+  FRONT_DESK
+  FINANCE
+  HOUSEKEEPING
+  RESTAURANT
+  BOUTIQUE
+  ENTERTAINMENT
+  CONTENT_EDITOR
+}
+
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+  DEAD
+}
+
+enum NotificationChannel {
+  EMAIL
+  IN_APP
+  PUSH
+  SMS
+  WHATSAPP
+}
+
+enum HoldStatus {
+  ACTIVE
+  CONSUMED
+  EXPIRED
+  RELEASED
+}
+
+enum AssignmentKind {
+  RESERVATION
+  BLOCK
+}
+
+// ---------------------------------------------------------------------------
+
+model Property {
+  id            String     @id @default(uuid()) @db.Uuid
+  slug          String     @unique
+  name          String
+  legalName     String?
+  tagline       String
+  description   String
+  addressLine   String
+  city          String
+  region        String
+  country       String
+  postalCode    String?
+  phone         String
+  email         String
+  latitude      Decimal?   @db.Decimal(9, 6)
+  longitude     Decimal?   @db.Decimal(9, 6)
+  timeZone      String     @default("Africa/Monrovia")
+  currency      Currency   @default(USD)
+  secondaryCurrency Currency?
+  checkInTime   String     @default("14:00")
+  checkOutTime  String     @default("11:00")
+  arrivalCutoffTime String  @default("22:00")
+  minStayNights Int        @default(1)
+  maxStayNights Int        @default(30)
+  bookingWindowDays Int    @default(540)
+  minLeadTimeDays Int      @default(0)
+  maxRoomsPerReservation Int @default(5)
+  roomsPerPage  Int        @default(12)
+  holdTtlMinutes Int       @default(15)
+  isPublished   Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  roomTypes        RoomType[]
+  physicalRooms    PhysicalRoom[]
+  ratePlans        RatePlan[]
+  seasons          Season[]
+  taxes            TaxFee[]
+  cancellationPolicies CancellationPolicy[]
+  promotions       Promotion[]
+  amenities        Amenity[]
+  media            Media[]
+  settings         Setting[]
+  reviews          Review[]
+  reservations     Reservation[]
+  menuCategories   RestaurantMenuCategory[]
+  tableRequests    TableRequest[]
+  collections      BoutiqueCollection[]
+  events           Event[]
+  contentBlocks    ContentBlock[]
+  faqs             Faq[]
+
+  @@map("properties")
+}
+
+model Setting {
+  id         String   @id @default(uuid()) @db.Uuid
+  propertyId String?  @db.Uuid
+  key        String
+  value      Json
+  updatedAt  DateTime @updatedAt
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, key])
+  @@map("settings")
+}
+
+model Amenity {
+  id         String   @id @default(uuid()) @db.Uuid
+  propertyId String?  @db.Uuid
+  code       String
+  label      String
+  category   String   @default("general")
+  icon       String?
+  sortOrder  Int      @default(0)
+  verified   Boolean  @default(false)
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  roomTypes  RoomTypeAmenity[]
+
+  @@unique([propertyId, code])
+  @@map("amenities")
+}
+
+model Media {
+  id          String     @id @default(uuid()) @db.Uuid
+  propertyId  String?    @db.Uuid
+  roomTypeId  String?    @db.Uuid
+  productId   String?    @db.Uuid
+  eventId     String?    @db.Uuid
+  menuItemId  String?    @db.Uuid
+  collectionId String?   @db.Uuid
+  url         String
+  kind        MediaKind  @default(IMAGE)
+  alt         String
+  caption     String?
+  width       Int?
+  height      Int?
+  ratio       String?
+  sortOrder   Int        @default(0)
+  createdAt   DateTime   @default(now())
+
+  property    Property?  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  roomType    RoomType?  @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+  product     Product?   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  event       Event?     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  menuItem    MenuItem?  @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  collection  BoutiqueCollection? @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@index([roomTypeId])
+  @@index([propertyId])
+  @@map("media")
+}
+
+model RoomType {
+  id              String        @id @default(uuid()) @db.Uuid
+  propertyId      String        @db.Uuid
+  slug            String
+  name            String
+  shortDescription String
+  description     String
+  bedConfiguration String
+  maxOccupancy    Int
+  maxAdults       Int           @default(2)
+  maxChildren     Int           @default(2)
+  sizeSqm         Int?
+  sizeVerified    Boolean       @default(false)
+  accessibility   String[]      @default([])
+  accessibilityVerified Boolean @default(false)
+  smokingPolicy   SmokingPolicy @default(NON_SMOKING)
+  bathroomDetails String?
+  baseCurrency    Currency      @default(USD)
+  sortOrder       Int           @default(0)
+  isPublished     Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  property        Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  amenities       RoomTypeAmenity[]
+  media           Media[]
+  rooms           PhysicalRoom[]
+  ratePlans       RatePlan[]
+  nights          RoomTypeNight[]
+  reservationRooms ReservationRoom[]
+
+  @@unique([propertyId, slug])
+  @@index([propertyId])
+  @@map("room_types")
+}
+
+model RoomTypeAmenity {
+  roomTypeId String   @db.Uuid
+  amenityId  String   @db.Uuid
+  roomType   RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([roomTypeId, amenityId])
+  @@map("room_type_amenities")
+}
+
+model PhysicalRoom {
+  id          String       @id @default(uuid()) @db.Uuid
+  propertyId  String       @db.Uuid
+  roomTypeId  String       @db.Uuid
+  number      String
+  floor       String?
+  readiness   RoomReadiness @default(CLEAN)
+  active      Boolean      @default(true)
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  property    Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  roomType    RoomType     @relation(fields: [roomTypeId], references: [id], onDelete: Restrict)
+  assignments RoomAssignment[]
+  assignmentNights RoomAssignmentNight[]
+  blocks      MaintenanceBlock[]
+  tasks       HousekeepingTask[]
+
+  @@unique([propertyId, number])
+  @@index([roomTypeId])
+  @@map("physical_rooms")
+}
+
+model RatePlan {
+  id                   String   @id @default(uuid()) @db.Uuid
+  propertyId           String   @db.Uuid
+  roomTypeId           String?  @db.Uuid
+  code                 String
+  name                 String
+  description          String?
+  currency             Currency @default(USD)
+  baseRateMinor        Int
+  weekendRateMinor     Int?
+  weekendDays          Int[]    @default([5, 6])
+  minStayNights        Int      @default(1)
+  maxStayNights        Int      @default(30)
+  cancellationPolicyId String?  @db.Uuid
+  includesTaxes        Boolean  @default(false)
+  isDefault            Boolean  @default(false)
+  isActive             Boolean  @default(true)
+  priority             Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  property           Property           @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  roomType           RoomType?          @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+  cancellationPolicy CancellationPolicy? @relation(fields: [cancellationPolicyId], references: [id], onDelete: SetNull)
+  rates              RatePlanRate[]
+  reservationRooms   ReservationRoom[]
+
+  @@unique([propertyId, code])
+  @@index([roomTypeId])
+  @@map("rate_plans")
+}
+
+model RatePlanRate {
+  id              String   @id @default(uuid()) @db.Uuid
+  ratePlanId      String   @db.Uuid
+  date            DateTime @db.Date
+  nightlyMinor    Int
+  closedToArrival Boolean  @default(false)
+  closedToDeparture Boolean @default(false)
+  minStayNights   Int?
+
+  ratePlan RatePlan @relation(fields: [ratePlanId], references: [id], onDelete: Cascade)
+
+  @@unique([ratePlanId, date])
+  @@map("rate_plan_rates")
+}
+
+model Season {
+  id           String   @id @default(uuid()) @db.Uuid
+  propertyId   String   @db.Uuid
+  name         String
+  startDate    DateTime @db.Date
+  endDate      DateTime @db.Date
+  multiplierBps Int     @default(10000) // 10000 = 1.0x
+  priority     Int      @default(0)
+  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("seasons")
+}
+
+model CancellationPolicy {
+  id                     String   @id @default(uuid()) @db.Uuid
+  propertyId             String   @db.Uuid
+  code                   String
+  name                   String
+  summary                String
+  freeCancellationUntilDaysBefore Int @default(1)
+  noShowPenaltyFirstNight Boolean @default(true)
+  penaltyPercentBps      Int      @default(0)
+  isDefault              Boolean  @default(false)
+  property               Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  ratePlans              RatePlan[]
+
+  @@unique([propertyId, code])
+  @@map("cancellation_policies")
+}
+
+model TaxFee {
+  id          String     @id @default(uuid()) @db.Uuid
+  propertyId  String     @db.Uuid
+  code        String
+  label       String
+  kind        TaxKind
+  mode        ChargeMode
+  valueBps    Int?       // basis points for percent
+  amountMinor Int?       // for flat
+  appliesTo   String     @default("ROOM")
+  taxable     Boolean    @default(false)
+  inclusive   Boolean    @default(false)
+  isActive    Boolean    @default(false)
+  sortOrder   Int        @default(0)
+  property    Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, code])
+  @@map("taxes_fees")
+}
+
+model Promotion {
+  id          String        @id @default(uuid()) @db.Uuid
+  propertyId  String        @db.Uuid
+  code        String        @unique
+  description String
+  kind        PromotionKind
+  valueBps    Int?
+  amountMinor Int?
+  minNights   Int?
+  validFrom   DateTime?     @db.Date
+  validTo     DateTime?     @db.Date
+  usageLimit  Int?
+  usageCount  Int           @default(0)
+  isActive    Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+
+  property    Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("promotions")
+}
+
+// Nightly inventory ledger. `sold` counts holds + active reservations;
+// `blocked` counts out-of-order/maintenance rooms. Availability = capacity - sold - blocked.
+model RoomTypeNight {
+  id         String   @id @default(uuid()) @db.Uuid
+  roomTypeId String   @db.Uuid
+  date       DateTime @db.Date
+  capacity   Int
+  sold       Int      @default(0)
+  blocked    Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  roomType RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+
+  @@unique([roomTypeId, date])
+  @@index([date])
+  @@map("room_type_nights")
+}
+
+model MaintenanceBlock {
+  id          String    @id @default(uuid()) @db.Uuid
+  roomId      String    @db.Uuid
+  startDate   DateTime  @db.Date
+  endDate     DateTime  @db.Date
+  kind        BlockKind
+  reason      String
+  createdById String?   @db.Uuid
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  releasedAt  DateTime?
+
+  room    PhysicalRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  createdBy User?      @relation("MaintenanceBlockCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([roomId])
+  @@index([startDate, endDate])
+  @@map("maintenance_blocks")
+}
+
+model Hold {
+  id          String     @id @default(uuid()) @db.Uuid
+  reservationId String   @unique @db.Uuid
+  status      HoldStatus @default(ACTIVE)
+  expiresAt   DateTime
+  createdAt   DateTime   @default(now())
+  consumedAt  DateTime?
+  releasedAt  DateTime?
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@index([status, expiresAt])
+  @@map("holds")
+}
+
+model IdempotencyKey {
+  id          String   @id @default(uuid()) @db.Uuid
+  scope       String
+  key         String
+  requestHash String
+  responseJson Json
+  statusCode  Int      @default(200)
+  createdAt   DateTime @default(now())
+
+  @@unique([scope, key])
+  @@map("idempotency_keys")
+}
+
+model Reservation {
+  id             String            @id @default(uuid()) @db.Uuid
+  reference      String            @unique
+  propertyId     String            @db.Uuid
+  guestProfileId String?           @db.Uuid
+  status         ReservationState  @default(HELD)
+  paymentState   PaymentState      @default(UNPAID)
+  source         ReservationSource @default(ONLINE)
+  currency       Currency          @default(USD)
+  checkIn        DateTime          @db.Date
+  checkOut       DateTime          @db.Date
+  nights         Int
+  adultsTotal    Int
+  childrenTotal  Int
+  leadGuestName  String
+  leadGuestPhone String
+  leadGuestEmail String?
+  estimatedArrivalTime String?
+  specialRequests String?
+  communicationPreference String @default("EMAIL")
+  marketingConsent Boolean         @default(false)
+  subtotalMinor  Int
+  taxesMinor     Int               @default(0)
+  feesMinor      Int               @default(0)
+  discountMinor  Int               @default(0)
+  totalMinor     Int
+  amountPaidMinor Int              @default(0)
+  currencyRate   Decimal?          @db.Decimal(18, 6)
+  rateSnapshot   Json
+  policySnapshot Json
+  promotionCode  String?
+  cancelledAt    DateTime?
+  cancelledById  String?           @db.Uuid
+  cancellationReason String?
+  noShowAt       DateTime?
+  checkedInAt    DateTime?
+  checkedInById  String?           @db.Uuid
+  checkedOutAt   DateTime?
+  checkedOutById String?           @db.Uuid
+  manageTokenHash String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  createdById    String?           @db.Uuid
+  version        Int               @default(0)
+
+  property     Property        @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  guestProfile GuestProfile?   @relation(fields: [guestProfileId], references: [id], onDelete: SetNull)
+  rooms        ReservationRoom[]
+  roomNights   ReservationRoomNight[]
+  hold         Hold?
+  folio        Folio?
+  payments     Payment[]
+  assignments  RoomAssignment[]
+  requests     GuestRequest[]
+  reviews      Review[]
+  createdBy    User?           @relation("ReservationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  cancelledBy  User?           @relation("ReservationCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
+  checkedInBy  User?           @relation("ReservationCheckedInBy", fields: [checkedInById], references: [id], onDelete: SetNull)
+  checkedOutBy User?           @relation("ReservationCheckedOutBy", fields: [checkedOutById], references: [id], onDelete: SetNull)
+
+  @@index([propertyId, checkIn])
+  @@index([status])
+  @@index([guestProfileId])
+  @@map("reservations")
+}
+
+model ReservationRoom {
+  id             String   @id @default(uuid()) @db.Uuid
+  reservationId  String   @db.Uuid
+  roomTypeId     String   @db.Uuid
+  ratePlanId     String   @db.Uuid
+  quantity       Int      @default(1)
+  adults         Int
+  children       Int      @default(0)
+  childAges      Int[]    @default([])
+  nightlyRates   Json     // [{ date, minor }]
+  subtotalMinor  Int
+  taxesMinor     Int      @default(0)
+  feesMinor      Int      @default(0)
+  totalMinor     Int
+
+  reservation Reservation       @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  roomType    RoomType          @relation(fields: [roomTypeId], references: [id], onDelete: Restrict)
+  ratePlan    RatePlan          @relation(fields: [ratePlanId], references: [id], onDelete: Restrict)
+  nights      ReservationRoomNight[]
+  assignments RoomAssignment[]
+
+  @@index([reservationId])
+  @@map("reservation_rooms")
+}
+
+model ReservationRoomNight {
+  id                String   @id @default(uuid()) @db.Uuid
+  reservationRoomId String   @db.Uuid
+  roomTypeId        String   @db.Uuid
+  reservationId     String   @db.Uuid
+  date              DateTime @db.Date
+  quantity          Int
+  nightlyMinor      Int
+
+  reservationRoom ReservationRoom @relation(fields: [reservationRoomId], references: [id], onDelete: Cascade)
+  reservation     Reservation     @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@unique([reservationRoomId, date])
+  @@index([roomTypeId, date])
+  @@index([reservationId])
+  @@map("reservation_room_nights")
+}
+
+// Unique(roomId, date) guarantees a physical room cannot be double-assigned.
+model RoomAssignmentNight {
+  id        String   @id @default(uuid()) @db.Uuid
+  roomId    String   @db.Uuid
+  date      DateTime @db.Date
+  active    Boolean  @default(true)
+  room      PhysicalRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, date])
+  @@index([date])
+  @@map("room_assignment_nights")
+}
+
+model RoomAssignment {
+  id                String         @id @default(uuid()) @db.Uuid
+  reservationId     String         @db.Uuid
+  reservationRoomId String         @db.Uuid
+  roomId            String         @db.Uuid
+  startDate         DateTime       @db.Date
+  endDate           DateTime       @db.Date
+  active            Boolean        @default(true)
+  assignedById      String?        @db.Uuid
+  createdAt         DateTime       @default(now())
+  releasedAt        DateTime?
+  kind              AssignmentKind @default(RESERVATION)
+
+  reservation     Reservation     @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  reservationRoom ReservationRoom @relation(fields: [reservationRoomId], references: [id], onDelete: Cascade)
+  room            PhysicalRoom    @relation(fields: [roomId], references: [id], onDelete: Restrict)
+
+  @@index([reservationId])
+  @@index([roomId])
+  @@map("room_assignments")
+}
+
+model GuestProfile {
+  id            String   @id @default(uuid()) @db.Uuid
+  firstName     String
+  lastName      String
+  email         String?
+  phoneCountryCode String
+  phoneNumber   String
+  marketingConsent Boolean @default(false)
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  reservations Reservation[]
+  account      GuestAccount?
+
+  @@index([phoneNumber])
+  @@index([email])
+  @@map("guest_profiles")
+}
+
+model GuestAccount {
+  id             String   @id @default(uuid()) @db.Uuid
+  guestProfileId String   @unique @db.Uuid
+  email          String   @unique
+  passwordHash   String
+  emailVerified  Boolean  @default(false)
+  lastLoginAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  guestProfile   GuestProfile @relation(fields: [guestProfileId], references: [id], onDelete: Cascade)
+  @@map("guest_accounts")
+}
+
+model User {
+  id            String   @id @default(uuid()) @db.Uuid
+  email         String   @unique
+  fullName      String
+  passwordHash  String
+  role          Role
+  isActive      Boolean  @default(true)
+  totpSecret    String?
+  totpEnabled   Boolean  @default(false)
+  lastLoginAt   DateTime?
+  failedLogins  Int      @default(0)
+  lockedUntil   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  blocksCreated MaintenanceBlock[] @relation("MaintenanceBlockCreatedBy")
+  tasks         HousekeepingTask[] @relation("TaskAssignee")
+  tasksCreated  HousekeepingTask[] @relation("TaskCreatedBy")
+  payments      Payment[]          @relation("PaymentRecordedBy")
+  refunds       Refund[]           @relation("RefundApprovedBy")
+  sessions      StaffSession[]
+  reservationsCreated Reservation[] @relation("ReservationCreatedBy")
+  reservationsCancelled Reservation[] @relation("ReservationCancelledBy")
+  reservationsCheckedIn Reservation[] @relation("ReservationCheckedInBy")
+  reservationsCheckedOut Reservation[] @relation("ReservationCheckedOutBy")
+  auditLogs     AuditLog[]
+
+  @@map("users")
+}
+
+model StaffSession {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  refreshHash  String   @unique
+  userAgent    String?
+  ip           String?
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("staff_sessions")
+}
+
+model Folio {
+  id            String   @id @default(uuid()) @db.Uuid
+  reservationId String   @unique @db.Uuid
+  currency      Currency @default(USD)
+  status        String   @default("OPEN")
+  openedAt      DateTime @default(now())
+  closedAt      DateTime?
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  charges       FolioCharge[]
+
+  @@map("folios")
+}
+
+model FolioCharge {
+  id          String   @id @default(uuid()) @db.Uuid
+  folioId     String   @db.Uuid
+  kind        String   // ROOM, RESTAURANT, BOUTIQUE, EXTRA, TAX, FEE, ADJUSTMENT
+  description String
+  quantity    Int      @default(1)
+  unitMinor   Int
+  amountMinor Int
+  taxMinor    Int      @default(0)
+  voided      Boolean  @default(false)
+  voidedById  String?  @db.Uuid
+  voidReason  String?
+  createdById String?  @db.Uuid
+  createdAt   DateTime @default(now())
+  folio       Folio    @relation(fields: [folioId], references: [id], onDelete: Cascade)
+
+  @@index([folioId])
+  @@map("folio_charges")
+}
+
+model Payment {
+  id                 String        @id @default(uuid()) @db.Uuid
+  reservationId      String        @db.Uuid
+  folioId            String?       @db.Uuid
+  amountMinor        Int
+  currency           Currency
+  settlementCurrency Currency?
+  settlementAmountMinor Int?
+  exchangeRate       Decimal?      @db.Decimal(18, 6)
+  rateCapturedAt     DateTime?
+  method             PaymentMethod
+  transactionReference String?
+  verified           Boolean       @default(false)
+  recordedById       String?       @db.Uuid
+  notes              String?
+  createdAt          DateTime      @default(now())
+  voided             Boolean       @default(false)
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  recordedBy  User?       @relation("PaymentRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+  refunds     Refund[]
+
+  @@index([reservationId])
+  @@map("payments")
+}
+
+model Refund {
+  id           String   @id @default(uuid()) @db.Uuid
+  paymentId    String   @db.Uuid
+  amountMinor  Int
+  currency     Currency
+  reason       String
+  approvedById String?  @db.Uuid
+  createdAt    DateTime @default(now())
+  payment      Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  approvedBy   User?    @relation("RefundApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@index([paymentId])
+  @@map("refunds")
+}
+
+model HousekeepingTask {
+  id          String       @id @default(uuid()) @db.Uuid
+  roomId      String       @db.Uuid
+  type        TaskType
+  priority    TaskPriority @default(NORMAL)
+  status      TaskStatus   @default(OPEN)
+  dueAt       DateTime?
+  assigneeId  String?      @db.Uuid
+  createdById String?      @db.Uuid
+  notes       String?
+  completedAt DateTime?
+  inspectedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  room      PhysicalRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  assignee  User?        @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  createdBy User?        @relation("TaskCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([roomId])
+  @@map("housekeeping_tasks")
+}
+
+model GuestRequest {
+  id            String             @id @default(uuid()) @db.Uuid
+  reservationId String             @db.Uuid
+  type          String
+  details       String
+  status        GuestRequestStatus @default(PENDING)
+  resolvedById  String?            @db.Uuid
+  resolutionNote String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@index([reservationId])
+  @@map("guest_requests")
+}
+
+model RestaurantMenuCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  propertyId  String   @db.Uuid
+  slug        String
+  name        String
+  description String?
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(false)
+  items       MenuItem[]
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, slug])
+  @@map("restaurant_menu_categories")
+}
+
+model MenuItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  categoryId  String   @db.Uuid
+  slug        String   @unique
+  name        String
+  description String
+  priceMinor  Int
+  currency    Currency @default(USD)
+  ingredients String[]
+  allergens   String[] @default([])
+  dietaryLabels String[] @default([])
+  isDemo      Boolean  @default(true)
+  isAvailable Boolean  @default(true)
+  soldOut     Boolean  @default(false)
+  isDailySpecial Boolean @default(false)
+  spiceLevel  Int      @default(0)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category RestaurantMenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  media    Media[]
+
+  @@map("menu_items")
+}
+
+model TableRequest {
+  id           String        @id @default(uuid()) @db.Uuid
+  propertyId   String        @db.Uuid
+  name         String
+  phoneCountryCode String
+  phoneNumber  String
+  email        String?
+  date         DateTime      @db.Date
+  time         String
+  partySize    Int
+  notes        String?
+  status       InquiryStatus @default(NEW)
+  createdAt    DateTime      @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("table_requests")
+}
+
+model BoutiqueCollection {
+  id          String   @id @default(uuid()) @db.Uuid
+  propertyId  String   @db.Uuid
+  slug        String   @unique
+  name        String
+  description String
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(false)
+  products    Product[]
+  media       Media[]
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("boutique_collections")
+}
+
+model Product {
+  id           String   @id @default(uuid()) @db.Uuid
+  collectionId String?  @db.Uuid
+  slug         String   @unique
+  name         String
+  description  String
+  priceMinor   Int
+  currency     Currency @default(USD)
+  careInstructions String?
+  isDemo       Boolean  @default(true)
+  isPublished  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  collection BoutiqueCollection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  variants   ProductVariant[]
+  media      Media[]
+  inquiries  BoutiqueInquiry[]
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id         String   @id @default(uuid()) @db.Uuid
+  productId  String   @db.Uuid
+  sku        String   @unique
+  size       String
+  color      String
+  available  Boolean  @default(true)
+  stockNote  String?
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_variants")
+}
+
+model BoutiqueInquiry {
+  id          String        @id @default(uuid()) @db.Uuid
+  name        String
+  email       String
+  phoneCountryCode String?
+  phoneNumber String?
+  productId   String?       @db.Uuid
+  variantId   String?       @db.Uuid
+  kind        String
+  message     String?
+  status      InquiryStatus @default(NEW)
+  createdAt   DateTime      @default(now())
+
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@map("boutique_inquiries")
+}
+
+model Event {
+  id          String        @id @default(uuid()) @db.Uuid
+  propertyId  String        @db.Uuid
+  slug        String        @unique
+  title       String
+  description String
+  startsAt    DateTime
+  endsAt      DateTime?
+  venue       String
+  ageRestricted Boolean     @default(false)
+  minimumAge  Int?
+  smokingVenue Boolean      @default(false)
+  isPublished Boolean       @default(false)
+  isDemo      Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  media    Media[]
+  inquiries EventInquiry[]
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("events")
+}
+
+model EventInquiry {
+  id              String        @id @default(uuid()) @db.Uuid
+  name            String
+  email           String
+  phoneCountryCode String
+  phoneNumber     String
+  eventType       String
+  preferredDate   DateTime?     @db.Date
+  partySize       Int?
+  details         String?
+  status          InquiryStatus @default(NEW)
+  createdAt       DateTime      @default(now())
+
+  eventId String? @db.Uuid
+  event   Event?  @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  @@map("event_inquiries")
+}
+
+model ContactMessage {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  email       String
+  phoneNumber String?
+  subject     String
+  message     String
+  handled     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("contact_messages")
+}
+
+model NewsletterSubscriber {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  consentAt    DateTime @default(now())
+  unsubscribedAt DateTime?
+
+  @@map("newsletter_subscribers")
+}
+
+model Review {
+  id            String       @id @default(uuid()) @db.Uuid
+  propertyId    String       @db.Uuid
+  reservationId String?      @db.Uuid
+  guestName     String
+  rating        Int
+  title         String?
+  body          String
+  status        ReviewStatus @default(PENDING)
+  isDemo        Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  publishedAt   DateTime?
+
+  property    Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  reservation Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+
+  @@index([propertyId, status])
+  @@map("reviews")
+}
+
+model ContentBlock {
+  id          String        @id @default(uuid()) @db.Uuid
+  propertyId  String?       @db.Uuid
+  key         String        @unique
+  title       String?
+  body        String?
+  data        Json?
+  status      ContentStatus @default(DRAFT)
+  updatedById String?       @db.Uuid
+  updatedAt   DateTime      @updatedAt
+  createdAt   DateTime      @default(now())
+
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("content_blocks")
+}
+
+model Faq {
+  id         String        @id @default(uuid()) @db.Uuid
+  propertyId String?       @db.Uuid
+  question   String
+  answer     String
+  category   String        @default("general")
+  status     ContentStatus @default(DRAFT)
+  sortOrder  Int           @default(0)
+
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("faqs")
+}
+
+model NotificationTemplate {
+  id        String   @id @default(uuid()) @db.Uuid
+  code      String   @unique
+  channel   NotificationChannel
+  subject   String?
+  body      String
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_templates")
+}
+
+model OutboxJob {
+  id            String        @id @default(uuid()) @db.Uuid
+  topic         String
+  payload       Json
+  status        OutboxStatus  @default(PENDING)
+  attempts      Int           @default(0)
+  maxAttempts   Int           @default(5)
+  lastError     String?
+  dedupeKey     String?       @unique
+  availableAt   DateTime      @default(now())
+  createdAt     DateTime      @default(now())
+  processedAt   DateTime?
+
+  @@index([status, availableAt])
+  @@map("outbox_jobs")
+}
+
+model Notification {
+  id          String              @id @default(uuid()) @db.Uuid
+  channel     NotificationChannel
+  recipient   String
+  subject     String?
+  body        String
+  templateCode String?
+  reservationId String?           @db.Uuid
+  status      OutboxStatus        @default(PENDING)
+  providerMessageId String?
+  error       String?
+  sentAt      DateTime?
+  createdAt   DateTime            @default(now())
+
+  @@index([status])
+  @@index([reservationId])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  actorId    String?  @db.Uuid
+  actorRole  String?
+  action     String
+  entityType String
+  entityId   String?
+  before     Json?
+  after      Json?
+  reason     String?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@map("audit_logs")
+}

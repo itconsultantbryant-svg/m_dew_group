@@ -1,0 +1,1210 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Mountain Dew Group API",
+    "version": "0.1.0",
+    "description": "Shared REST API for the Mountain Dew Group website, mobile apps and staff portal. Accommodation booking is the primary service. Payment is collected at the property unless configured otherwise."
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {}
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/properties/{slug}": {
+      "get": {
+        "summary": "Get public property details",
+        "tags": [
+          "public"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "slug",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/room-types": {
+      "get": {
+        "summary": "List published room types",
+        "tags": [
+          "public"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/room-types/{slug}": {
+      "get": {
+        "summary": "Get a room type with optional date-specific availability",
+        "tags": [
+          "public"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "slug",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/availability": {
+      "get": {
+        "summary": "Search room availability for a date range",
+        "tags": [
+          "booking"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/quotes": {
+      "post": {
+        "summary": "Price a stay without holding inventory",
+        "tags": [
+          "booking"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/holds": {
+      "post": {
+        "summary": "Create an expiring hold that reserves inventory without payment",
+        "tags": [
+          "booking"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/reservations": {
+      "post": {
+        "summary": "Confirm a held reservation (idempotent). No online payment is collected.",
+        "tags": [
+          "booking"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/reservations/lookup": {
+      "post": {
+        "summary": "Find a reservation using reference and surname",
+        "tags": [
+          "booking"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/reservations/{reference}": {
+      "get": {
+        "summary": "Retrieve a reservation via a signed link",
+        "tags": [
+          "booking"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "reference",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/reservations/{reference}/cancel": {
+      "post": {
+        "summary": "Cancel a reservation (idempotent)",
+        "tags": [
+          "booking"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "reference",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/reservations/{reference}/modify": {
+      "post": {
+        "summary": "Request or apply a change to dates or rooms",
+        "tags": [
+          "booking"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "reference",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/reservations/{reference}/requests": {
+      "post": {
+        "summary": "Submit a guest request (arrival, extra bed, etc.)",
+        "tags": [
+          "booking"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "reference",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/reviews": {
+      "get": {
+        "summary": "List published guest reviews",
+        "tags": [
+          "public"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "summary": "Submit a review for a completed stay",
+        "tags": [
+          "public"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/content/home": {
+      "get": {
+        "summary": "Homepage content composition",
+        "tags": [
+          "public"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/restaurant/menu": {
+      "get": {
+        "summary": "Published restaurant menu (demonstration content until approved)",
+        "tags": [
+          "services"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/boutique/catalog": {
+      "get": {
+        "summary": "Published boutique catalog",
+        "tags": [
+          "services"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/experiences/events": {
+      "get": {
+        "summary": "Upcoming published events",
+        "tags": [
+          "services"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/faqs": {
+      "get": {
+        "summary": "Published frequently asked questions",
+        "tags": [
+          "public"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/restaurant/table-requests": {
+      "post": {
+        "summary": "Request a table (pending until staff confirm)",
+        "tags": [
+          "services"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/boutique/inquiries": {
+      "post": {
+        "summary": "Ask about or reserve a boutique item for pickup",
+        "tags": [
+          "services"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/experiences/event-inquiries": {
+      "post": {
+        "summary": "Inquire about an event or private hire",
+        "tags": [
+          "services"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/contact": {
+      "post": {
+        "summary": "Send a contact message",
+        "tags": [
+          "public"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/newsletter": {
+      "post": {
+        "summary": "Subscribe to marketing updates",
+        "tags": [
+          "public"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/auth/guest/register": {
+      "post": {
+        "summary": "Create an optional guest account",
+        "tags": [
+          "guest"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/auth/guest/login": {
+      "post": {
+        "summary": "Sign in to a guest account",
+        "tags": [
+          "guest"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/auth/guest/logout": {
+      "post": {
+        "summary": "Sign out of a guest account",
+        "tags": [
+          "guest"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/auth/guest/me": {
+      "get": {
+        "summary": "Current guest account",
+        "tags": [
+          "guest"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/guest/reservations": {
+      "get": {
+        "summary": "List the signed-in guest reservations",
+        "tags": [
+          "guest"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/guest/account": {
+      "delete": {
+        "summary": "Delete a guest account subject to retention rules",
+        "tags": [
+          "guest"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/auth/staff/login": {
+      "post": {
+        "summary": "Staff sign in (MFA optional per configuration)",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/auth/staff/refresh": {
+      "post": {
+        "summary": "Exchange the refresh cookie for a new access token",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/auth/staff/logout": {
+      "post": {
+        "summary": "Staff sign out",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/auth/staff/me": {
+      "get": {
+        "summary": "Current staff user",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/dashboard": {
+      "get": {
+        "summary": "Operational dashboard",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/reservations": {
+      "get": {
+        "summary": "Search reservations",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a walk-in, phone or staff reservation",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/reservations/{id}": {
+      "get": {
+        "summary": "Reservation detail with folio and requests",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Modify dates/rooms transactionally",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/reservations/{id}/assign-room": {
+      "post": {
+        "summary": "Assign a physical room",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/reservations/{id}/checkin": {
+      "post": {
+        "summary": "Check a guest in",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/reservations/{id}/checkout": {
+      "post": {
+        "summary": "Check a guest out and raise a cleaning task",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/reservations/{id}/no-show": {
+      "post": {
+        "summary": "Record a no-show (no money treated as collected)",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/reservations/{id}/cancel": {
+      "post": {
+        "summary": "Cancel a reservation",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/reservations/{id}/resend-confirmation": {
+      "post": {
+        "summary": "Resend the confirmation message",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/rooms": {
+      "get": {
+        "summary": "Physical rooms and readiness",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/room-calendar": {
+      "get": {
+        "summary": "Occupancy calendar for a date range",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/room-blocks": {
+      "get": {
+        "summary": "List maintenance/out-of-order blocks",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "summary": "Block a room for maintenance or out-of-order",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/room-blocks/{id}": {
+      "delete": {
+        "summary": "Release a maintenance block",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/rooms/{id}/readiness": {
+      "patch": {
+        "summary": "Update room readiness",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/housekeeping/tasks": {
+      "get": {
+        "summary": "List housekeeping tasks",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a housekeeping task",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/housekeeping/tasks/{id}": {
+      "patch": {
+        "summary": "Update a housekeeping task",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/payments": {
+      "post": {
+        "summary": "Record a payment taken at the property",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/refunds": {
+      "post": {
+        "summary": "Approve a refund",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/reports/summary": {
+      "get": {
+        "summary": "Occupancy, ADR, RevPAR, revenue and cash metrics",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/reports/export": {
+      "get": {
+        "summary": "CSV export of reservations (spreadsheet-safe escaping)",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/notifications": {
+      "get": {
+        "summary": "Notification delivery queue and failures",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/notifications/process": {
+      "post": {
+        "summary": "Process the outbox now",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/guests": {
+      "get": {
+        "summary": "Search guest profiles",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/content": {
+      "get": {
+        "summary": "Content blocks and FAQs",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/content/catalog": {
+      "get": {
+        "summary": "Full content catalogue including unpublished items",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/content/{key}": {
+      "put": {
+        "summary": "Upsert a content block",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "key",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/menu/items/{id}": {
+      "put": {
+        "summary": "Update a menu item (availability, sold-out, allergens)",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/boutique/products/{id}": {
+      "put": {
+        "summary": "Update a boutique product",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/experiences/events/{id}": {
+      "put": {
+        "summary": "Update an event",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/audit": {
+      "get": {
+        "summary": "Recent audit log entries",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/admin/overview": {
+      "get": {
+        "summary": "Real-time operations overview for the admin dashboard",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/users": {
+      "get": {
+        "summary": "List staff accounts",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a staff account",
+        "tags": [
+          "staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/staff/users/{id}": {
+      "patch": {
+        "summary": "Update a staff account (role, name, password, active)",
+        "tags": [
+          "staff"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4100",
+      "description": "Current environment"
+    }
+  ],
+  "tags": [
+    {
+      "name": "public",
+      "description": "Untrusted, cacheable public content"
+    },
+    {
+      "name": "booking",
+      "description": "Availability, quotes, holds and reservations"
+    },
+    {
+      "name": "guest",
+      "description": "Guest account and reservation management"
+    },
+    {
+      "name": "staff",
+      "description": "Staff operations (requires staff authentication)"
+    },
+    {
+      "name": "services",
+      "description": "Restaurant, boutique and experiences"
+    }
+  ]
+}

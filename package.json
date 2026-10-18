@@ -1,0 +1,29 @@
+{
+  "name": "mountain-dew-group",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mountain Dew Group - hotel booking platform, mobile apps and staff portal",
+  "packageManager": "pnpm@11.3.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm -r --filter './packages/**' build && pnpm -r --filter './apps/api' build && pnpm -r --filter './apps/web' build",
+    "build:packages": "pnpm -r --filter './packages/**' build",
+    "vercel-build:api": "pnpm -w run build:packages && pnpm --filter @mdg/api exec prisma generate",
+    "vercel-build:web": "pnpm -w run build:packages && pnpm --filter @mdg/web exec next build",
+    "dev:api": "pnpm --filter @mdg/api dev",
+    "dev:web": "pnpm --filter @mdg/web dev",
+    "dev:mobile": "pnpm --filter @mdg/mobile start",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "db:migrate": "pnpm --filter @mdg/api db:migrate",
+    "db:seed": "pnpm --filter @mdg/api db:seed",
+    "db:reset": "pnpm --filter @mdg/api db:reset",
+    "test:concurrency": "pnpm --filter @mdg/api test:concurrency"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

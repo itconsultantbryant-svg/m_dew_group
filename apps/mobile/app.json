@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Mountain Dew Group",
+    "slug": "mountain-dew-group",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "mountaindew",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#173D32"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mountaindewgroup.app"
+    },
+    "android": {
+      "package": "com.mountaindewgroup.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#173D32"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/icon.png"
+    },
+    "extra": {
+      "apiUrl": "http://localhost:4100"
+    }
+  }
+}

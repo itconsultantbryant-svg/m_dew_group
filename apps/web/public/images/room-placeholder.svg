@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Room image placeholder">
+  <rect width="800" height="600" fill="#EFE8D9"/>
+  <rect x="120" y="360" width="560" height="120" rx="12" fill="#E3D8C2"/>
+  <circle cx="640" cy="180" r="60" fill="#C9A876"/>
+  <path d="M120 360h560M200 360v-90a60 60 0 0 1 60-60h280a60 60 0 0 1 60 60v90" fill="none" stroke="#173D32" stroke-width="14" stroke-linecap="round"/>
+  <text x="400" y="540" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#173D32">Mountain Dew Group</text>
+</svg>

@@ -1,0 +1,73 @@
+/* Mountain Dew Group design tokens as CSS custom properties. */
+:root {
+  /* color */
+  --mdg-forest-950: #0e2a22;
+  --mdg-forest-900: #173d32;
+  --mdg-forest-800: #1e4a3d;
+  --mdg-forest-700: #275c4c;
+  --mdg-forest-600: #357262;
+  --mdg-ivory-50: #fcfaf4;
+  --mdg-ivory-100: #f7f3ea;
+  --mdg-ivory-200: #efe8d9;
+  --mdg-ivory-300: #e3d8c2;
+  --mdg-charcoal-900: #161a16;
+  --mdg-charcoal-800: #222722;
+  --mdg-charcoal-700: #333a33;
+  --mdg-charcoal-600: #4b534b;
+  --mdg-charcoal-500: #6b736b;
+  --mdg-brass: #ae864a;
+  --mdg-brass-light: #c9a876;
+  --mdg-brass-dark: #8a6a34;
+  --mdg-brass-ink: #7a5c2b;
+  --mdg-terracotta: #b3664d;
+  --mdg-terracotta-light: #ce8a72;
+  --mdg-terracotta-dark: #8f4c37;
+  --mdg-terracotta-ink: #9a4e36;
+  --mdg-sand-100: #f1e7d6;
+  --mdg-sand-200: #e4d3b6;
+
+  --mdg-success: #2f6b4f;
+  --mdg-success-surface: #e4f0e8;
+  --mdg-warning: #8a6a1f;
+  --mdg-warning-surface: #f7ebcb;
+  --mdg-danger: #9b3b2e;
+  --mdg-danger-surface: #f6e1dc;
+  --mdg-info: #2a5b7a;
+  --mdg-info-surface: #dfeaf2;
+  --mdg-neutral-surface: #efece4;
+
+  /* typography */
+  --mdg-font-display: 'Fraunces', 'Georgia', 'Times New Roman', serif;
+  --mdg-font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* radii */
+  --mdg-radius-sm: 0.25rem;
+  --mdg-radius-md: 0.5rem;
+  --mdg-radius-lg: 0.75rem;
+  --mdg-radius-xl: 1rem;
+  --mdg-radius-2xl: 1.5rem;
+  --mdg-radius-pill: 9999px;
+
+  /* elevation */
+  --mdg-elevation-sm: 0 1px 2px rgba(22, 26, 22, 0.06), 0 1px 3px rgba(22, 26, 22, 0.08);
+  --mdg-elevation-md: 0 2px 6px rgba(22, 26, 22, 0.08), 0 6px 16px rgba(22, 26, 22, 0.08);
+  --mdg-elevation-lg: 0 8px 24px rgba(22, 26, 22, 0.12), 0 2px 6px rgba(22, 26, 22, 0.08);
+  --mdg-elevation-overlay: 0 24px 64px rgba(14, 42, 34, 0.28);
+
+  /* motion */
+  --mdg-duration-fast: 150ms;
+  --mdg-duration-control: 180ms;
+  --mdg-duration-transition: 240ms;
+  --mdg-duration-overlay: 280ms;
+  --mdg-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --mdg-ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mdg-duration-fast: 0ms;
+    --mdg-duration-control: 0ms;
+    --mdg-duration-transition: 0ms;
+    --mdg-duration-overlay: 0ms;
+  }
+}

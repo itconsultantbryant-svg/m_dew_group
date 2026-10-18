@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["node"],
+    "noEmit": false
+  },
+  "include": ["src/**/*.ts", "api/**/*.ts", "prisma/**/*.ts", "test/**/*.ts"]
+}
