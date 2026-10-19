@@ -314,10 +314,9 @@ API at `/api`. This is driven by the **root `vercel.json`** committed in the rep
   "services": {
     "api": {
       "root": "apps/api",
+      "entrypoint": "app.ts",
       "installCommand": "pnpm install --no-frozen-lockfile",
-      "buildCommand": "pnpm -w run vercel-build:api",
-      "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }],
-      "functions": { "api/index.ts": { "memory": 1024, "maxDuration": 30 } }
+      "buildCommand": "pnpm -w run vercel-build:api"
     },
     "web": {
       "root": "apps/web",
@@ -335,6 +334,11 @@ API at `/api`. This is driven by the **root `vercel.json`** committed in the rep
   ]
 }
 ```
+
+Vercel auto-detects the **fastify** framework for `apps/api` (because `fastify` is a
+dependency), and a framework service requires an `entrypoint`. `apps/api/app.ts` is that entry: it wins
+Vercel's entry-file search (name `app`, plus a `fastify` import) and default-exports the same
+`(req, res)` handler the standalone deployment uses, so both shapes share one implementation.
 
 | Request | Service | Notes |
 | --- | --- | --- |
