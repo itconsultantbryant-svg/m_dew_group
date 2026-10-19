@@ -161,7 +161,7 @@ The project ships ready for **Neon** (PostgreSQL) and **Vercel**:
   server-side calls reaching the API over a private `API_URL` binding.
 
 The API serves everything under `API_BASE_PATH` (empty by default; `/api` in services mode), managed
-by `apps/api/vercel.json` / root `vercel.json`, and Prisma uses a pooled `DATABASE_URL` (runtime) plus
+by the root `vercel.json`, and Prisma uses a pooled `DATABASE_URL` (runtime) plus
 an unpooled `DIRECT_URL` (migrations) for Neon.
 
 See **[docs/DEPLOY-NEON-VERCEL.md](docs/DEPLOY-NEON-VERCEL.md)** for the full step-by-step guide

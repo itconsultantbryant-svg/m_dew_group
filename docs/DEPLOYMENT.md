@@ -257,6 +257,10 @@ Both must keep `?sslmode=require`.
 
 ### 12.3 Deploy the API project to Vercel
 
+> The per-app configs are committed as `apps/api/vercel.standalone.json` and
+> `apps/web/vercel.standalone.json` so Vercel Services mode doesn't read them. For this two-project
+> option, rename them to `vercel.json` in each app first.
+
 Create a Vercel project from the same repository with:
 
 | Setting | Value |

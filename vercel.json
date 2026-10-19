@@ -3,6 +3,7 @@
   "services": {
     "api": {
       "root": "apps/api",
+      "framework": "fastify",
       "entrypoint": "app.ts",
       "installCommand": "pnpm install --no-frozen-lockfile",
       "buildCommand": "pnpm -w run vercel-build:api"

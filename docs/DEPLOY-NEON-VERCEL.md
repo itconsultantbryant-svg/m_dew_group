@@ -31,8 +31,9 @@ A complete, copy-paste guide to run this repository in production with:
 ```
 
 Two Vercel projects from **one** Git repository (different **Root Directory**), plus one Neon
-database. The API config (`apps/api/vercel.json`) rewrites every path to a single serverless entry
-that reuses one Fastify instance per warm lambda.
+database. The API config (`apps/api/vercel.standalone.json`, renamed to `vercel.json` for this
+option) rewrites every path to a single serverless entry that reuses one Fastify instance per warm
+lambda.
 
 ---
 
@@ -99,6 +100,7 @@ Never reuse the development defaults in production.
 2. Configure:
    - **Root Directory:** `apps/api`
    - **Framework Preset:** Other (Vercel reads `apps/api/vercel.json`)
+   - Rename `apps/api/vercel.standalone.json` to `apps/api/vercel.json` before this option
    - Build/Install commands: leave as-is — `vercel.json` supplies them
      (`pnpm -w run vercel-build:api`, `pnpm install --no-frozen-lockfile`).
 3. Add the **Environment Variables** below (tick **Production** *and* **Preview**).
@@ -179,6 +181,8 @@ Add a **second** Vercel project from the **same** repository:
 | **Root Directory** | `apps/web` |
 | **Framework Preset** | Next.js |
 | Build/Install | from `apps/web/vercel.json` (`pnpm -w run vercel-build:web`) |
+
+(Rename `apps/web/vercel.standalone.json` to `apps/web/vercel.json` for this option.)
 
 Environment variable:
 
@@ -312,8 +316,9 @@ API at `/api`. This is driven by the **root `vercel.json`** committed in the rep
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
-    "api": {
+    "api":     {
       "root": "apps/api",
+      "framework": "fastify",
       "entrypoint": "app.ts",
       "installCommand": "pnpm install --no-frozen-lockfile",
       "buildCommand": "pnpm -w run vercel-build:api"
@@ -388,8 +393,12 @@ npx vercel@latest --prod
 Then run migrations as in Step 4, and the first-admin bootstrap as in Step 6 — the only difference is
 the API base URL ends in `/api` and the web app is on the same domain.
 
-> The `apps/api/vercel.json` and `apps/web/vercel.json` files are **ignored** in services mode (Vercel
-> reads only the root `vercel.json`); they remain for the two-project option above.
+> The two-project configs live as `apps/api/vercel.standalone.json` and
+> `apps/web/vercel.standalone.json`. They are **renamed** (not `vercel.json`) because a service
+> builder reads a `vercel.json` inside its own root: the old `apps/api/vercel.json` declared
+> `"framework": null`, which made Vercel build the API service as a static site and fail with
+> `STATIC_BUILD_NO_OUT_DIR`. Keep the standalone names so services mode reads only the root
+> `vercel.json`; restore/copy them to `vercel.json` only if you switch to the two-project option.
 
 ---
 
