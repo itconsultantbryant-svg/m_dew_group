@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.json --noEmit",
     "start": "tsx src/server.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "vercel-build": "prisma generate",
+    "vercel-build": "pnpm -w run build:packages && prisma generate",
     "lint": "echo \"no lint configured\"",
     "test": "vitest run",
     "test:concurrency": "vitest run test/concurrency",

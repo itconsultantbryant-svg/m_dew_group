@@ -422,6 +422,10 @@ The Neon strings, secrets and CORS rules are identical.
 | `Can't reach database server` | `DATABASE_URL` missing or not the pooled string; confirm `?sslmode=require`. |
 | Migrations hang / `P1002` | Set `DIRECT_URL` to the **unpooled** endpoint. |
 | `ERR_PNPM_...` / pnpm not found on Vercel | Vercel must honour `packageManager: pnpm@11.3.0`. If it rejects v11, set the project env `ENABLE_EXPERIMENTAL_COREPACK=1`, or pin `packageManager` to a supported version (e.g. `pnpm@10`). |
+| `ERR_PNPM_IGNORED_BUILDS` on install | pnpm 11 replaced `onlyBuiltDependencies` with `allowBuilds`; keep it in `pnpm-workspace.yaml`. |
+| `NODE_TYPESCRIPT_ERROR … Cannot find module '@mdg/domain' / '@mdg/validation'` | The API service's `apps/api` → `vercel-build` must compile the shared packages first: `pnpm -w run build:packages && prisma generate`. |
+| `STATIC_BUILD_NO_OUT_DIR: No Output Directory named "public"` | A `vercel.json` inside the service root set `framework: null`. Keep the per-app configs named `vercel.standalone.json`. |
+| `MISSING_SERVICE_CONFIG … specify an "entrypoint"` | Set `entrypoint: "app.ts"` on the api service; `apps/api/app.ts` must exist. |
 | Web calls fail / CORS error | `CORS_ORIGINS` must equal the web origin exactly (scheme + host, no trailing slash); include preview URLs. |
 | API 500 on `/docs` | Swagger **UI** is off in production by design; use `/openapi.json` or set `ENABLE_API_DOCS=true`. |
 | Cold start felt by users | Neon free tier scales compute to zero; raise minimum compute or add a Cron warm-up (§11). |
