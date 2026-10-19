@@ -2,11 +2,15 @@ packages:
   - "apps/*"
   - "packages/*"
 
-onlyBuiltDependencies:
-  - "@prisma/client"
-  - "@prisma/engines"
-  - "@tailwindcss/oxide"
-  - esbuild
-  - prisma
-  - sharp
-  - unrs-resolver
+# pnpm 11 replaced `onlyBuiltDependencies` with an explicit `allowBuilds` map.
+# `strictDepBuilds` defaults to true, so a clean install (e.g. on Vercel) fails
+# with ERR_PNPM_IGNORED_BUILDS unless every dependency that runs install scripts
+# is listed here.
+allowBuilds:
+  "@prisma/client": true
+  "@prisma/engines": true
+  "@tailwindcss/oxide": true
+  esbuild: true
+  prisma: true
+  sharp: true
+  unrs-resolver: true
