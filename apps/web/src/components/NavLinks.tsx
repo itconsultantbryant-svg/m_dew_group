@@ -21,7 +21,7 @@ export function NavLinks({ variant }: { variant: 'desktop' | 'mobile' }) {
 
   if (variant === 'desktop') {
     return (
-      <nav aria-label="Primary" className="hidden items-center gap-0.5 lg:flex">
+      <nav aria-label="Primary" className="hidden items-center gap-0.5 xl:flex">
         {NAV.map((item) => {
           const active = isActive(pathname, item.href);
           return (
@@ -47,7 +47,7 @@ export function NavLinks({ variant }: { variant: 'desktop' | 'mobile' }) {
   }
 
   return (
-    <nav aria-label="Primary mobile" className="border-t border-forest-900/10 lg:hidden">
+    <nav aria-label="Primary mobile" className="border-t border-forest-900/10 xl:hidden">
       <div className="container-page flex gap-1.5 overflow-x-auto py-2">
         {NAV.map((item) => {
           const active = isActive(pathname, item.href);

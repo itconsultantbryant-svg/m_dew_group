@@ -6,7 +6,7 @@ import { todayISO } from '@/lib/format';
 
 interface SearchBarProps {
   initial?: { checkIn?: string; checkOut?: string; adults?: number; children?: number; rooms?: number };
-  variant?: 'hero' | 'inline';
+  variant?: 'hero' | 'inline' | 'sidebar';
 }
 
 export function SearchBar({ initial, variant = 'hero' }: SearchBarProps) {
@@ -40,15 +40,17 @@ export function SearchBar({ initial, variant = 'hero' }: SearchBarProps) {
       onSubmit={submit}
       className={
         variant === 'hero'
-          ? 'card grid gap-4 p-5 shadow-lift sm:p-6 sm:grid-cols-2 lg:grid-cols-5 lg:items-end'
-          : 'grid gap-3 sm:grid-cols-2 lg:grid-cols-5 lg:items-end'
+          ? 'card grid gap-4 p-5 shadow-lift sm:grid-cols-2 sm:p-6'
+          : variant === 'sidebar'
+            ? 'grid gap-3'
+            : 'grid gap-3 sm:grid-cols-2 lg:grid-cols-5 lg:items-end'
       }
       aria-label="Search availability"
     >
       {variant === 'hero' ? (
         <p className="col-span-full font-display text-lg font-semibold text-forest-900">Check availability</p>
       ) : null}
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="flex min-w-0 flex-col gap-1 text-sm">
         <span className="label mb-0">Check-in</span>
         <input
           type="date"
@@ -59,7 +61,7 @@ export function SearchBar({ initial, variant = 'hero' }: SearchBarProps) {
           required
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="flex min-w-0 flex-col gap-1 text-sm">
         <span className="label mb-0">Check-out</span>
         <input
           type="date"
@@ -70,7 +72,7 @@ export function SearchBar({ initial, variant = 'hero' }: SearchBarProps) {
           required
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="flex min-w-0 flex-col gap-1 text-sm">
         <span className="label mb-0">Adults</span>
         <select value={adults} onChange={(e) => setAdults(Number(e.target.value))} className="field">
           {[1, 2, 3, 4, 5, 6].map((n) => (
@@ -78,7 +80,7 @@ export function SearchBar({ initial, variant = 'hero' }: SearchBarProps) {
           ))}
         </select>
       </label>
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="flex min-w-0 flex-col gap-1 text-sm">
         <span className="label mb-0">Children</span>
         <select value={children} onChange={(e) => setChildren(Number(e.target.value))} className="field">
           {[0, 1, 2, 3, 4].map((n) => (
@@ -86,11 +88,21 @@ export function SearchBar({ initial, variant = 'hero' }: SearchBarProps) {
           ))}
         </select>
       </label>
-      <button type="submit" className="btn btn-primary py-2.5">
+      <button
+        type="submit"
+        className={`btn btn-primary w-full py-2.5 ${
+          variant === 'hero' ? 'sm:col-span-2' : variant === 'inline' ? 'sm:col-span-2 lg:col-span-1' : ''
+        }`}
+      >
         Check availability
       </button>
       {error ? (
-        <p role="alert" className="text-sm font-medium text-danger sm:col-span-2 lg:col-span-5">
+        <p
+          role="alert"
+          className={`text-sm font-medium text-danger ${
+            variant === 'hero' ? 'sm:col-span-2' : variant === 'inline' ? 'sm:col-span-2 lg:col-span-5' : ''
+          }`}
+        >
           {error}
         </p>
       ) : null}

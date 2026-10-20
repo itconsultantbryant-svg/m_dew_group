@@ -70,7 +70,7 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <dl className="mt-12 grid max-w-xl grid-cols-3 gap-6 border-t border-ivory-100/15 pt-6">
+            <dl className="mt-12 grid max-w-xl grid-cols-1 gap-4 border-t border-ivory-100/15 pt-6 sm:grid-cols-3 sm:gap-6">
               {HIGHLIGHTS.map((item) => (
                 <div key={item.label}>
                   <dt className="font-display text-base font-semibold text-ivory-50">{item.label}</dt>

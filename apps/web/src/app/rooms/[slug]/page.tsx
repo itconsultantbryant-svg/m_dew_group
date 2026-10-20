@@ -111,7 +111,7 @@ export default async function RoomDetailPage({
             </p>
 
             <div className="mt-5 border-t border-forest-900/10 pt-5">
-              <SearchBar variant="inline" initial={{ checkIn, checkOut }} />
+              <SearchBar variant="sidebar" initial={{ checkIn, checkOut }} />
             </div>
 
             {hasDates ? (
